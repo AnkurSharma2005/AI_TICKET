@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function SignupPage() {
-  const [form, setForm] = useState({ email: "", password: "" });
+  // ✅ added username here
+  const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -21,11 +22,13 @@ export default function SignupPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(form),
+          body: JSON.stringify(form), // ✅ username automatically included
         }
       );
 
       const data = await res.json();
+      // console.log("hi"); 
+      // console.log(data);  
 
       if (res.ok) {
         localStorage.setItem("token", data.token);
@@ -48,11 +51,22 @@ export default function SignupPage() {
         <form onSubmit={handleSignup} className="card-body">
           <h2 className="card-title justify-center">Sign Up</h2>
 
+          {/* ✅ NEW username field */}
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            className="input input-bordered w-full"
+            value={form.username}
+            onChange={handleChange}
+            required
+          />
+
           <input
             type="email"
             name="email"
             placeholder="Email"
-            className="input input-bordered"
+            className="input input-bordered w-full"
             value={form.email}
             onChange={handleChange}
             required
@@ -62,7 +76,7 @@ export default function SignupPage() {
             type="password"
             name="password"
             placeholder="Password"
-            className="input input-bordered"
+            className="input input-bordered w-full"
             value={form.password}
             onChange={handleChange}
             required

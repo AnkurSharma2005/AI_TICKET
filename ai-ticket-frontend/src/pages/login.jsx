@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: "", password: "" });
+  // ✅ changed email → identifier
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -19,7 +20,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(form), // ✅ sends identifier + password
       });
 
       const data = await res.json();
@@ -45,12 +46,13 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="card-body">
           <h2 className="card-title justify-center">Login</h2>
 
+          {/* ✅ changed input */}
           <input
-            type="email"
-            name="email"
-            placeholder="Email"
+            type="text"
+            name="identifier"
+            placeholder="Username or Email"
             className="input input-bordered"
-            value={form.email}
+            value={form.identifier}
             onChange={handleChange}
             required
           />

@@ -14,13 +14,13 @@ export default function Navbar() {
     navigate("/login");
   };
   return (
-    <div className="navbar bg-base-200">
+    <div className="navbar bg-base-100">
       <div className="flex-1">
         <Link to="/" className="btn btn-ghost text-xl">
           Ticket AI
         </Link>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         {!token ? (
           <>
             <Link to="/signup" className="btn btn-sm">
@@ -32,7 +32,7 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <p>Hi, {user?.email}</p>
+            <p className="px-2">Hi, {user?.username || "Guest"}</p>
             {user && user?.role === "admin" ? (
               <Link to="/admin" className="btn btn-sm">
                 Admin

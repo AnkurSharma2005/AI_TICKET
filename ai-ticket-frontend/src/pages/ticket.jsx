@@ -6,10 +6,39 @@ export default function TicketDetailsPage() {
   const { id } = useParams();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+    // 🔹 Fetch user email using userId
+    const fetchAssignedEmail = async (userId) => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_SERVER_URL}/auth/user/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+        // console.log("Assigned user data:", data); 
+
+        if (res.ok) {
+         
+          setEmail(data.email);
+          setUsername(data.username); 
+        } else {
+          console.error("Failed to fetch assigned email1", data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching assigned email2", err);
+      }
+    };
+
+    // 🔹 Fetch ticket using ticket ID
     const fetchTicket = async () => {
       try {
         const res = await fetch(
@@ -20,9 +49,16 @@ export default function TicketDetailsPage() {
             },
           }
         );
+
         const data = await res.json();
+
         if (res.ok) {
           setTicket(data.ticket);
+
+          // 🔹 Now fetch user email using assignedTo (userId)
+          if (data.ticket.assignedTo) {
+            fetchAssignedEmail(data.ticket.assignedTo);
+          }
         } else {
           alert(data.message || "Failed to fetch ticket");
         }
@@ -37,9 +73,13 @@ export default function TicketDetailsPage() {
     fetchTicket();
   }, [id]);
 
+  // 🔹 Loading state
   if (loading)
     return <div className="text-center mt-10">Loading ticket details...</div>;
-  if (!ticket) return <div className="text-center mt-10">Ticket not found</div>;
+
+  // 🔹 No ticket found
+  if (!ticket)
+    return <div className="text-center mt-10">Ticket not found</div>;
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -49,13 +89,15 @@ export default function TicketDetailsPage() {
         <h3 className="text-xl font-semibold">{ticket.title}</h3>
         <p>{ticket.description}</p>
 
-        {/* Conditionally render extended details */}
+        {/* 🔹 Extra details */}
         {ticket.status && (
           <>
             <div className="divider">Metadata</div>
+
             <p>
               <strong>Status:</strong> {ticket.status}
             </p>
+
             {ticket.priority && (
               <p>
                 <strong>Priority:</strong> {ticket.priority}
@@ -78,15 +120,17 @@ export default function TicketDetailsPage() {
               </div>
             )}
 
+            {/* 🔹 Email from second API */}
             {ticket.assignedTo && (
               <p>
-                <strong>Assigned To:</strong> {ticket.assignedTo?.email}
+                <strong>Assigned To:</strong> {username || email || "Loading..."}
               </p>
             )}
 
             {ticket.createdAt && (
               <p className="text-sm text-gray-500 mt-2">
-                Created At: {new Date(ticket.createdAt).toLocaleString()}
+                Created At:{" "}
+                {new Date(ticket.createdAt).toLocaleString()}
               </p>
             )}
           </>

@@ -4,12 +4,15 @@ import User from "../models/user.js";
 import { inngest } from "../inngest/client.js";
 
 export const signup = async (req, res) => {
-  const { email, password, skills = [] } = req.body;
+  const {username, email, password, skills = [] } = req.body;
   try {
-    const hashed = brcypt.hash(password, 10);
-    const user = await User.create({ email, password: hashed, skills });
+    const userCount = await User.countDocuments();
+    const role = userCount === 0 ? "admin" : "user";
 
-    //Fire inngest event
+    const hashed = await brcypt.hash(password, 10);
+    const user = await User.create({username : username.trim() , email : email.trim() , password: hashed , skills, role });
+
+    // Fire inngest event
 
     await inngest.send({
       name: "user/signup",
@@ -30,10 +33,17 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { identifier, password } = req.body;
 
   try {
-    const user = User.findOne({ email });
+    // ✅ find by email OR username
+    const user = await User.findOne({
+      $or: [
+        { email: identifier.trim() },
+        { username: identifier.trim() }
+      ]
+    });
+
     if (!user) return res.status(401).json({ error: "User not found" });
 
     const isMatch = await brcypt.compare(password, user.password);
@@ -67,7 +77,7 @@ export const logout = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  const { skills = [], role, email } = req.body;
+  const { skills = [], role, email ,embeddings} = req.body;
   try {
     if (req.user?.role !== "admin") {
       return res.status(403).json({ eeor: "Forbidden" });
@@ -77,8 +87,10 @@ export const updateUser = async (req, res) => {
 
     await User.updateOne(
       { email },
-      { skills: skills.length ? skills : user.skills, role }
+      { skills: skills.length ? skills : user.skills, role: role, embedding:embeddings},
     );
+    const updated = await User.findOne({ email });
+    console.log("Saved embeddings:", updated.embedding?.length);
     return res.json({ message: "User updated successfully" });
   } catch (error) {
     res.status(500).json({ error: "Update failed", details: error.message });
@@ -97,3 +109,14 @@ export const getUsers = async (req, res) => {
     res.status(500).json({ error: "Update failed", details: error.message });
   }
 };
+
+export const getuser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findById(id).select("-password");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    return res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch user", details: error.message });
+  }
+}

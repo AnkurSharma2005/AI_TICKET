@@ -1,9 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "./App.jsx";
+// import App from "./App.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import CheckAuth from "./components/check-auth.jsx";
+import Navbar from "./components/navbar.jsx";
 import Tickets from "./pages/tickets.jsx";
 import TicketDetailsPage from "./pages/ticket.jsx";
 import Login from "./pages/login.jsx";
@@ -13,11 +14,12 @@ import Admin from "./pages/admin.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
+      <Navbar />
       <Routes>
         <Route
           path="/"
           element={
-            <CheckAuth protected={true}>
+            <CheckAuth protectedRoute={true}>
               <Tickets />
             </CheckAuth>
           }
@@ -25,7 +27,7 @@ createRoot(document.getElementById("root")).render(
         <Route
           path="/tickets/:id"
           element={
-            <CheckAuth protected={true}>
+            <CheckAuth protectedRoute={true}>
               <TicketDetailsPage />
             </CheckAuth>
           }
@@ -33,7 +35,7 @@ createRoot(document.getElementById("root")).render(
         <Route
           path="/login"
           element={
-            <CheckAuth protected={false}>
+            <CheckAuth protectedRoute={false}>
               <Login />
             </CheckAuth>
           }
@@ -41,7 +43,7 @@ createRoot(document.getElementById("root")).render(
         <Route
           path="/signup"
           element={
-            <CheckAuth protected={false}>
+            <CheckAuth protectedRoute={false}>
               <Signup />
             </CheckAuth>
           }
@@ -49,7 +51,7 @@ createRoot(document.getElementById("root")).render(
         <Route
           path="/admin"
           element={
-            <CheckAuth protected={true}>
+            <CheckAuth protectedRoute={true}>
               <Admin />
             </CheckAuth>
           }

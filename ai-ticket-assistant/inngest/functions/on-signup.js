@@ -17,14 +17,31 @@ export const onUserSignup = inngest.createFunction(
         return userObject;
       });
 
-      await setp.run("send-welcome-email", async () => {
-        const subject = `Welcome to the app`;
-        const message = `Hi,
-            \n\n
-            Thanks for signing up. We're glad to have you onboard!
-            `;
-        await sendMail(user.email, subject, message);
-      });
+      await step.run("send-welcome-email", async () => {
+      const subject = "Welcome to the Platform";
+
+      const message = `
+    Dear ${user.username || "User"},
+
+    Welcome to our platform!
+
+    We're excited to have you on board. Your account has been successfully created, and you can now start exploring all the features available to you.
+
+    Here’s what you can do next:
+    - Log in to your dashboard
+    - Explore available features
+    - Start creating and managing tickets
+
+    If you need any assistance, feel free to reach out to our support team.
+
+    We look forward to helping you have a great experience.
+
+    Best regards,  
+    Support Team  
+    `;
+
+      await sendMail(user.email, subject, message);
+    });
 
       return { success: true };
     } catch (error) {
